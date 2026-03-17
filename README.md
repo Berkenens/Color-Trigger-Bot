@@ -1,2 +1,3 @@
 # Color-Trigger-Bot
-Color Trigger Bot Script For Auto Hotkey
+Advanced Trigger Bot For Ahk
+# lol
