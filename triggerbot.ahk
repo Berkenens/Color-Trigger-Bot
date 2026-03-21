@@ -27,11 +27,15 @@ SoundBeep, 600, 150
 ; User Settings
 ;===================================================================================
 color_1        :=     0xFFF200    ; 1. Color (Yellow - Example: Valorant/CS2)
-color_2        :=     0xA145A3    ; 2. Color (Violet/Pink)
+color_2        :=     0x00F100    ; 2. Color (Violet/Pink)
 
 pixel_box      :=     2.5         ; Scan Area (2-4 is fastest)
 pixel_sens     :=     60          ; Color Sensibility
 tap_time       :=     15          ; Delay Between Taps
+
+; Pre-Fire Delay Settings
+fire_delay     :=     0           ; Default delay before shooting (ms)
+delay_step     :=     5           ; Increase/Decrease amount (Step)
 
 ; Startup Settings
 active_color   :=     color_1
@@ -49,19 +53,23 @@ key_exit       :=     "DELETE"    ; Close Script
 key_hold       :=     "LALT"      ; Hold Button (LAlt)
 key_hold_mode  :=     "8"         ; HoldModeON/OFF
 
+key_delay_up   :=     "Right"     ; Increase Fire Delay
+key_delay_down :=     "Left"      ; Decrease Fire Delay
+
 ;===================================================================================
 ; Gui 
 ;===================================================================================
 Gui,2:Font, s9 Bold, Segoe UI
 Gui,2:Color, 050505
-Gui,2:Add, Progress, x0 y0 w150 h75 Background050505 c222222 vStatusBG, 100
+Gui,2:Add, Progress, x0 y0 w150 h95 Background050505 c222222 vStatusBG, 100
 Gui,2:Add, Text, x10 y10 w130 h20 cWhite BackgroundTrans vModeText, MODE : NONE
 Gui,2:Add, Text, x10 y30 w130 h20 c00FF00 BackgroundTrans vColorText, Active: %color_label%
 Gui,2:Add, Text, x10 y50 w130 h20 cGray BackgroundTrans, F4: Stop
+Gui,2:Add, Text, x10 y70 w130 h20 cAqua BackgroundTrans vDelayText, Pre-Delay: %fire_delay% ms
 
 Gui 2:+LastFound +ToolWindow +AlwaysOnTop -Caption
 WinSet, TransColor, 050505 150 ; Transparency
-Gui, 2:Show, x10 y10 w150 h75, ByPerseus
+Gui, 2:Show, x10 y10 w150 h95, ByPerseus
 
 leftbound  := A_ScreenWidth/2 - pixel_box
 rightbound := A_ScreenWidth/2 + pixel_box
@@ -76,11 +84,29 @@ Hotkey, %key_off%, offloop
 Hotkey, %key_gui_hide%, guihide
 Hotkey, %key_exit%, terminate
 Hotkey, %key_fastclick%, fastclick
+Hotkey, %key_delay_up%, delayup
+Hotkey, %key_delay_down%, delaydown
 return
 
 ;===================================================================================
-; Loops
+; Loops & Controls
 ;===================================================================================
+
+delayup:
+fire_delay += delay_step
+GuiControl, 2:, DelayText, Pre-Delay: %fire_delay% ms
+SoundBeep, 600, 100
+return
+
+delaydown:
+if (fire_delay > 0) {
+    fire_delay -= delay_step
+    if (fire_delay < 0) 
+        fire_delay := 0
+}
+GuiControl, 2:, DelayText, Pre-Delay: %fire_delay% ms
+SoundBeep, 400, 100
+return
 
 colorswap:
 if (active_color == color_1) {
@@ -109,7 +135,6 @@ SoundBeep, 500, 200
 SetTimer, loop1, off
 SetTimer, loop2, 10
 GuiControl, 2:, ModeText, MODE : Hold Button (LAlt)
-
 return
 
 offloop:
@@ -177,6 +202,9 @@ PixelSearchFunction() {
         ; debug
         If !GetKeyState("LButton")
         {
+            if (fire_delay > 0)
+                Sleep, %fire_delay% 
+
             DllCall("mouse_event", uint, 2, int, 0, int, 0, uint, 0, int, 0) ; Bas
             DllCall("mouse_event", uint, 4, int, 0, int, 0, uint, 0, int, 0) ; Bırak
             Sleep, %tap_time%
