@@ -205,8 +205,8 @@ PixelSearchFunction() {
             if (fire_delay > 0)
                 Sleep, %fire_delay% 
 
-            DllCall("mouse_event", uint, 2, int, 0, int, 0, uint, 0, int, 0) ; Bas
-            DllCall("mouse_event", uint, 4, int, 0, int, 0, uint, 0, int, 0) ; Bırak
+            DllCall("mouse_event", uint, 2, int, 0, int, 0, uint, 0, int, 0) ; Down
+            DllCall("mouse_event", uint, 4, int, 0, int, 0, uint, 0, int, 0) ; Up
             Sleep, %tap_time%
         }
     }
